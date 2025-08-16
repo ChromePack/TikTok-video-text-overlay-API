@@ -55,7 +55,7 @@ TEXT_CONFIGS = {
         "fontFamily": "Proxima Nova Semibold",
         "fontWeight": "normal",
         "textColor": "#FFFFFF",
-        "bubbleColor": "#eb4040",
+        "bubbleColor": "#E84640",
         "bubbleOpacity": 1,
         "bubblePadding": 26,
         "horizontalPadding": 26,
