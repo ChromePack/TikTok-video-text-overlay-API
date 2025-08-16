@@ -169,7 +169,8 @@ class VideoProcessor:
                 video_clip.write_videofile(
                     output_video_path,
                     codec='libx264',
-                    audio_codec='aac'
+                    audio_codec='aac',
+                    ffmpeg_params=['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709']
                 )
                 return True
 
@@ -183,7 +184,8 @@ class VideoProcessor:
             final_video.write_videofile(
                 output_video_path,
                 codec='libx264',
-                audio_codec='aac'
+                audio_codec='aac',
+                ffmpeg_params=['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709']
             )
 
             print("✅ Video processing completed successfully")
