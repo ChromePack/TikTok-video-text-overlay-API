@@ -61,7 +61,7 @@ TEXT_CONFIGS = {
         "horizontalPadding": 26,
         "bubbleRadius": 7,
         "position": "bottom",
-        "lineHeight": -0.25,
+        "lineHeight": 0,
     },
 }
 
