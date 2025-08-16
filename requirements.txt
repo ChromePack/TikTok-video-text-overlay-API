@@ -1,0 +1,21 @@
+# Core framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+
+# Video processing (replaces FFmpeg)
+moviepy>=1.0.3
+opencv-python>=4.8.0
+
+# Image and text processing
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# File handling
+python-multipart>=0.0.6
+aiofiles>=23.0.0
+
+# HTTP requests for font download
+requests>=2.31.0
+
+# Additional utilities
+typing-extensions>=4.8.0
