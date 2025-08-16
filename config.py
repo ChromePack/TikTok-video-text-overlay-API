@@ -51,17 +51,17 @@ TEXT_CONFIGS = {
         "lineHeight": 1.2,
     },
     "text3": {
-        "fontSize": 42,
+        "fontSize": 46,
         "fontFamily": "Proxima Nova Semibold",
         "fontWeight": "normal",
         "textColor": "#FFFFFF",
         "bubbleColor": "#DB3643",
         "bubbleOpacity": 1,
-        "bubblePadding": 26,
+        "bubblePadding": 33,
         "horizontalPadding": 26,
-        "bubbleRadius": 13,
+        "bubbleRadius": 7,
         "position": "bottom",
-        "lineHeight": -0.2,
+        "lineHeight": 0,
     },
 }
 
