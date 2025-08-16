@@ -28,7 +28,7 @@ FONT_PATH = FONTS_DIR / "ProximaNova-Semibold.ttf"
 # Text overlay configurations
 TEXT_CONFIGS = {
     "text1": {
-        "fontSize": 48,
+        "fontSize": 46,
         "fontFamily": "Proxima Nova Semibold",
         "fontWeight": "normal",
         "textColor": "#131313",
@@ -61,7 +61,7 @@ TEXT_CONFIGS = {
         "horizontalPadding": 26,
         "bubbleRadius": 7,
         "position": "bottom",
-        "lineHeight": 0,
+        "lineHeight": -0.25,
     },
 }
 
