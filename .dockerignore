@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+START.md
+docs/
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.env
+.venv
+venv/
+pip-log.txt
+
+# Temporary files
+temp/*
+!temp/.gitkeep
+
+# Development
+.vscode
+.idea
+*.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Deployment
+deploy.sh
+.github/

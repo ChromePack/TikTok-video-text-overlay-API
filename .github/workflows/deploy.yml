@@ -1,0 +1,44 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+        
+    - name: Deploy to VPS
+      run: |
+        ssh -o StrictHostKeyChecking=no root@148.230.93.128 << 'ENDSSH'
+          # Navigate to app directory
+          cd /opt/tiktok-text-overlay-api || { echo "App directory not found"; exit 1; }
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Stop current container
+          docker-compose down
+          
+          # Rebuild and start container
+          docker-compose up --build -d
+          
+          # Show status
+          docker-compose ps
+          
+          # Check if service is healthy
+          sleep 10
+          curl -f http://localhost:3003/health || { echo "Health check failed"; exit 1; }
+          
+          echo "Deployment completed successfully!"
+        ENDSSH
