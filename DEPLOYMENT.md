@@ -55,29 +55,29 @@ curl -L "https://github.com/docker/compose/releases/latest/download/docker-compo
 chmod +x /usr/local/bin/docker-compose
 
 # Create application directory
-mkdir -p /opt/tiktok-text-overlay-api
+mkdir -p /var/www/tiktok-video-text-overlay-api
 ```
 
 ## 📊 Management Commands
 
 ### Check Service Status
 ```bash
-ssh root@148.230.93.128 'cd /opt/tiktok-text-overlay-api && docker-compose ps'
+ssh root@148.230.93.128 'cd /var/www/tiktok-video-text-overlay-api && docker-compose ps'
 ```
 
 ### View Logs
 ```bash
-ssh root@148.230.93.128 'cd /opt/tiktok-text-overlay-api && docker-compose logs -f'
+ssh root@148.230.93.128 'cd /var/www/tiktok-video-text-overlay-api && docker-compose logs -f'
 ```
 
 ### Restart Service
 ```bash
-ssh root@148.230.93.128 'cd /opt/tiktok-text-overlay-api && docker-compose restart'
+ssh root@148.230.93.128 'cd /var/www/tiktok-video-text-overlay-api && docker-compose restart'
 ```
 
 ### Update and Redeploy
 ```bash
-ssh root@148.230.93.128 'cd /opt/tiktok-text-overlay-api && git pull && docker-compose up --build -d'
+ssh root@148.230.93.128 'cd /var/www/tiktok-video-text-overlay-api && git pull && docker-compose up --build -d'
 ```
 
 ## 🔍 Health Monitoring

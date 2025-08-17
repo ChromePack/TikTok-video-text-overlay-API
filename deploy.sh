@@ -7,7 +7,7 @@ set -e
 
 VPS_IP="148.230.93.128"
 VPS_USER="root"
-APP_DIR="/opt/tiktok-text-overlay-api"
+APP_DIR="/var/www/tiktok-video-text-overlay-api"
 REPO_URL="https://github.com/ChromePack/TikTok-video-text-overlay-API.git"
 
 echo "🚀 Deploying TikTok Text Overlay API to VPS..."

@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  tiktok-text-overlay-api:
+  tiktok-video-text-overlay-api:
     build: .
-    container_name: tiktok-text-overlay-api
+    container_name: tiktok-video-text-overlay-api
     ports:
       - "3003:3003"
     environment:

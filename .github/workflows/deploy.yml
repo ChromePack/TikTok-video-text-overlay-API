@@ -22,7 +22,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no root@148.230.93.128 << 'ENDSSH'
           # Navigate to app directory
-          cd /opt/tiktok-text-overlay-api || { echo "App directory not found"; exit 1; }
+          cd /var/www/tiktok-video-text-overlay-api || { echo "App directory not found"; exit 1; }
           
           # Pull latest changes
           git pull origin main
