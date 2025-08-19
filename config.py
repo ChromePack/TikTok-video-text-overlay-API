@@ -16,6 +16,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 # File upload limits
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 ALLOWED_VIDEO_FORMATS = ["video/mp4", "video/quicktime", "video/x-msvideo"]
+ALLOWED_AUDIO_FORMATS = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp4", "audio/aac"]
 
 # Video specifications
 VIDEO_WIDTH = 720

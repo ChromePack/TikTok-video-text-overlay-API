@@ -7,7 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Tuple, Optional
 import numpy as np
-from moviepy import VideoFileClip, CompositeVideoClip, ImageClip
+from moviepy import VideoFileClip, CompositeVideoClip, ImageClip, AudioFileClip
 from PIL import Image
 from text_overlay import TikTokVideoTextOverlay
 from config import VIDEO_WIDTH, VIDEO_HEIGHT, PROCESSING_TIMEOUT
@@ -105,15 +105,17 @@ class VideoProcessor:
         self, 
         input_video_path: str, 
         texts: List[str], 
-        output_video_path: str
+        output_video_path: str,
+        audio_path: Optional[str] = None
     ) -> bool:
         """
-        Main video processing function that adds text overlays to video
+        Main video processing function that adds text overlays to video with optional background music
         
         Args:
             input_video_path: Path to input video file
             texts: List of 3 text strings for overlays
             output_video_path: Path where processed video will be saved
+            audio_path: Optional path to background music audio file
             
         Returns:
             bool: True if processing successful, False otherwise
@@ -146,8 +148,32 @@ class VideoProcessor:
             
             if not overlay_images:
                 print("⚠️ No text overlays generated")
-                # If no overlays, just output the original video
-                video_clip.write_videofile(
+                # If no overlays, use original video but still add background music if provided
+                final_video = video_clip
+                
+                # Add background music if provided
+                if audio_path:
+                    print(f"🎵 Adding background music: {audio_path}")
+                    try:
+                        background_audio = AudioFileClip(audio_path)
+                        
+                        # If audio is longer than video, trim it to video length
+                        if background_audio.duration > final_video.duration:
+                            background_audio = background_audio.subclipped(0, final_video.duration)
+                        # If audio is shorter than video, loop it
+                        elif background_audio.duration < final_video.duration:
+                            loops_needed = int(final_video.duration / background_audio.duration) + 1
+                            background_audio = background_audio.concatenate([background_audio] * loops_needed)
+                            background_audio = background_audio.subclipped(0, final_video.duration)
+                        
+                        # Since input video is always muted, just add background music at full volume
+                        final_video = final_video.with_audio(background_audio)
+                            
+                    except Exception as e:
+                        print(f"⚠️ Warning: Could not add background music: {e}")
+                        # Continue without background music
+                
+                final_video.write_videofile(
                     output_video_path,
                     codec='libx264',
                     audio_codec='aac',
@@ -166,7 +192,31 @@ class VideoProcessor:
 
             if not overlay_clips:
                 print("⚠️ No overlay clips created, outputting original video")
-                video_clip.write_videofile(
+                final_video = video_clip
+                
+                # Add background music if provided
+                if audio_path:
+                    print(f"🎵 Adding background music: {audio_path}")
+                    try:
+                        background_audio = AudioFileClip(audio_path)
+                        
+                        # If audio is longer than video, trim it to video length
+                        if background_audio.duration > final_video.duration:
+                            background_audio = background_audio.subclipped(0, final_video.duration)
+                        # If audio is shorter than video, loop it
+                        elif background_audio.duration < final_video.duration:
+                            loops_needed = int(final_video.duration / background_audio.duration) + 1
+                            background_audio = background_audio.concatenate([background_audio] * loops_needed)
+                            background_audio = background_audio.subclipped(0, final_video.duration)
+                        
+                        # Since input video is always muted, just add background music at full volume
+                        final_video = final_video.with_audio(background_audio)
+                            
+                    except Exception as e:
+                        print(f"⚠️ Warning: Could not add background music: {e}")
+                        # Continue without background music
+                
+                final_video.write_videofile(
                     output_video_path,
                     codec='libx264',
                     audio_codec='aac',
@@ -178,6 +228,28 @@ class VideoProcessor:
             print("🎭 Compositing video with text overlays...")
             clips_to_composite = [video_clip] + overlay_clips
             final_video = CompositeVideoClip(clips_to_composite)
+
+            # Add background music if provided
+            if audio_path:
+                print(f"🎵 Adding background music: {audio_path}")
+                try:
+                    background_audio = AudioFileClip(audio_path)
+                    
+                    # If audio is longer than video, trim it to video length
+                    if background_audio.duration > final_video.duration:
+                        background_audio = background_audio.subclipped(0, final_video.duration)
+                    # If audio is shorter than video, loop it
+                    elif background_audio.duration < final_video.duration:
+                        loops_needed = int(final_video.duration / background_audio.duration) + 1
+                        background_audio = background_audio.concatenate([background_audio] * loops_needed)
+                        background_audio = background_audio.subclipped(0, final_video.duration)
+                    
+                    # Since input video is always muted, just add background music at full volume
+                    final_video = final_video.with_audio(background_audio)
+                        
+                except Exception as e:
+                    print(f"⚠️ Warning: Could not add background music: {e}")
+                    # Continue without background music
 
             # Write output video
             print(f"💾 Writing output video: {output_video_path}")

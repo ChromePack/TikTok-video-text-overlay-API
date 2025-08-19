@@ -19,7 +19,7 @@ import uvicorn
 from video_processor import VideoProcessor
 from text_overlay import TikTokVideoTextOverlay
 from config import (
-    PORT, HOST, MAX_FILE_SIZE, ALLOWED_VIDEO_FORMATS, 
+    PORT, HOST, MAX_FILE_SIZE, ALLOWED_VIDEO_FORMATS, ALLOWED_AUDIO_FORMATS,
     TEMP_DIR, PROCESSING_TIMEOUT
 )
 
@@ -55,7 +55,7 @@ def ensure_temp_dir():
 def cleanup_file(file_path: str):
     """Safely remove a file"""
     try:
-        if os.path.exists(file_path):
+        if file_path and os.path.exists(file_path):
             os.remove(file_path)
     except Exception as e:
         print(f"Warning: Could not cleanup file {file_path}: {e}")
@@ -64,6 +64,13 @@ def cleanup_file(file_path: str):
 def validate_video_file(file: UploadFile) -> bool:
     """Validate uploaded video file"""
     if not file.content_type in ALLOWED_VIDEO_FORMATS:
+        return False
+    return True
+
+
+def validate_audio_file(file: UploadFile) -> bool:
+    """Validate uploaded audio file"""
+    if not file.content_type in ALLOWED_AUDIO_FORMATS:
         return False
     return True
 
@@ -101,6 +108,11 @@ async def root():
         "service": "TikTok Video Text Overlay API",
         "version": "1.0.0",
         "status": "OK",
+        "features": [
+            "Text overlays with TikTok-style formatting",
+            "Background music integration",
+            "Video format conversion to portrait (720x1280)"
+        ],
         "endpoints": {
             "health": "GET /health",
             "add_text_overlay": "POST /add-text-overlay"
@@ -118,11 +130,11 @@ async def health_check():
     }
 
 
-def process_video_sync(input_path: str, texts: List[str], output_path: str) -> bool:
+def process_video_sync(input_path: str, texts: List[str], output_path: str, audio_path: Optional[str] = None) -> bool:
     """Synchronous video processing function for thread pool"""
     try:
         return video_processor.process_video_with_text_overlays(
-            input_path, texts, output_path
+            input_path, texts, output_path, audio_path
         )
     except Exception as e:
         print(f"Error in video processing: {e}")
@@ -132,20 +144,23 @@ def process_video_sync(input_path: str, texts: List[str], output_path: str) -> b
 @app.post("/add-text-overlay")
 async def add_text_overlay(
     video: UploadFile = File(..., description="Video file (MP4, MOV, AVI)"),
-    texts: str = Form(..., description="JSON array of 3 text strings")
+    texts: str = Form(..., description="JSON array of 3 text strings"),
+    audio: Optional[UploadFile] = File(None, description="Optional audio file for background music (MP3, WAV, AAC)")
 ):
     """
-    Add text overlays to video
+    Add text overlays to video with optional background music
     
     Args:
         video: Video file upload
         texts: JSON string containing array of exactly 3 text strings
+        audio: Optional audio file for background music
         
     Returns:
-        Processed video file with text overlays
+        Processed video file with text overlays and background music
     """
     input_path = None
     output_path = None
+    audio_path = None
     
     try:
         # Validate video file
@@ -162,6 +177,22 @@ async def add_text_overlay(
                 status_code=400,
                 detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
             )
+        
+        # Validate and process audio file if provided
+        audio_content = None
+        if audio:
+            if not validate_audio_file(audio):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid audio file type. Only {', '.join(ALLOWED_AUDIO_FORMATS)} are allowed."
+                )
+            
+            audio_content = await audio.read()
+            if len(audio_content) > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Audio file too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
+                )
         
         # Parse texts JSON
         try:
@@ -190,8 +221,17 @@ async def add_text_overlay(
         with open(input_path, "wb") as f:
             f.write(content)
         
+        # Save uploaded audio to temp file if provided
+        if audio_content:
+            audio_filename = f"audio_{unique_id}.{audio.filename.split('.')[-1]}"
+            audio_path = os.path.join(TEMP_DIR, audio_filename)
+            with open(audio_path, "wb") as f:
+                f.write(audio_content)
+        
         print(f"📹 Processing video: {video.filename}")
         print(f"📝 Texts: {texts_list}")
+        if audio_path:
+            print(f"🎵 Background music: {audio.filename}")
         
         # Process video in thread pool with timeout
         loop = asyncio.get_event_loop()
@@ -200,7 +240,8 @@ async def add_text_overlay(
             process_video_sync, 
             input_path, 
             texts_list, 
-            output_path
+            output_path,
+            audio_path
         )
         
         try:
@@ -230,6 +271,8 @@ async def add_text_overlay(
             """Cleanup function to run after response is sent"""
             cleanup_file(input_path)
             cleanup_file(output_path)
+            if audio_path:
+                cleanup_file(audio_path)
         
         # Schedule cleanup after response
         background_tasks = None
@@ -258,12 +301,16 @@ async def add_text_overlay(
         # Re-raise HTTP exceptions
         cleanup_file(input_path)
         cleanup_file(output_path)
+        if audio_path:
+            cleanup_file(audio_path)
         raise
         
     except Exception as e:
         # Clean up files on error
         cleanup_file(input_path)
         cleanup_file(output_path)
+        if audio_path:
+            cleanup_file(audio_path)
         
         print(f"❌ Unexpected error: {e}")
         raise HTTPException(
